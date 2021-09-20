@@ -5,6 +5,6 @@ import (
 	"net/http"
 )
 
-func HelloGet(w http.ResponseWriter, r *http.Request) {
+func GetFlag(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Hello, World!")
 }

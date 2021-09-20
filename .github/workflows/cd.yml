@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CDD
+name: CD
 
 # Controls when the workflow will run
 on:
@@ -18,6 +18,10 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+    - uses: google-github-actions/setup-gcloud@master
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
     - uses: actions/checkout@v2
     - id: deploy
       uses: google-github-actions/deploy-cloud-functions@main
@@ -27,4 +31,4 @@ jobs:
         credentials: ${{ secrets.gcp_credentials }}
         memory_mb: 128
         region: europe-west1
-        
+
