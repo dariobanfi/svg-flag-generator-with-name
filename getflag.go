@@ -27,7 +27,14 @@ func GetFlag(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err)
 	}
 
-	sb := string(body)
-	// w.Header().Add("Content-Type", "image/svg")
-	fmt.Fprint(w, sb)
+	svg_code := string(body)
+	w.Header().Add("Content-Type", "text/html")
+	fmt.Fprint(w, `
+<!DOCTYPE>
+<html>
+  <body>
+`+svg_code+
+		`</body>
+</html>
+  `)
 }
