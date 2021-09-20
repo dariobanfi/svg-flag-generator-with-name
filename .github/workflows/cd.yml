@@ -15,20 +15,15 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   deploy:
-
     runs-on: ubuntu-latest
     steps:
-    - uses: google-github-actions/setup-gcloud@master
-      with:
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        export_default_credentials: true
     - uses: actions/checkout@v2
     - id: deploy
       uses: google-github-actions/deploy-cloud-functions@main
       with:
         name: GetFlag
+        credentials: ${{ secrets.GCP_SA_KEY }}
         runtime: go116
-        credentials: ${{ secrets.gcp_credentials }}
         memory_mb: 128
         region: europe-west1
 
