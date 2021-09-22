@@ -31,11 +31,15 @@ func GetFlag(w http.ResponseWriter, r *http.Request) {
 	resp, err := http.Get(ASSET_URL + flagid + ".svg")
 	if err != nil {
 		log.Fatalln(err)
+		fmt.Fprint(w, "Flag not found")
+		return
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalln(err)
+		fmt.Fprint(w, "Error downloading flag")
+		return
 	}
 
 	svg_code := string(body)
@@ -46,9 +50,29 @@ func GetFlag(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `
 <!DOCTYPE>
 <html>
+  <head>
+    <script>
+      function downloadSVG() {
+        const svg = document.getElementById('svgflag').innerHTML;
+        const blob = new Blob([svg.toString()]);
+        const element = document.createElement("a");
+        element.download = "`+flagid+`.svg";
+        element.href = window.URL.createObjectURL(blob);
+        element.click();
+        element.remove();
+      }
+    </script>
+  </head>
   <body>
-`+svg_code+
-		`</body>
+  <h1>Here's the flag of `+countryname+`</h1>
+  <div style="display:flex; flex-direction: row; justify-content: space-evenly;">
+    <div style="width: 50%; text-align: center;">
+      <div id="svgflag">`+svg_code+`</div>
+      <br /><br /><br />
+      <button onclick="downloadSVG()"> DOWNLOAD </button>
+    </div>
+  </div>
+  </body>
 </html>
   `)
 }
