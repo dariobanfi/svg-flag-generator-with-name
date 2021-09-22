@@ -15,10 +15,11 @@ var AssetUrl = "https://raw.githubusercontent.com/lipis/flag-icon-css/master/fla
 var CountryNameRect = `<svg width="640" height="480" x="140" y="340"> <g transform="translate(50,50)"> <rect rx="3" ry="3" width="260" height="70" stroke="black" fill="white" stroke-width="3"/> <svg width="260px" height="70px"> <text font-family="'Helvetica'" font-size="1.3em" x="50%" y="50%" alignment-baseline="middle" text-anchor="middle">country_name</text></svg></g></svg>`
 
 func GetFlag(w http.ResponseWriter, r *http.Request) {
+
 	flagId := strings.TrimPrefix(r.URL.Path, "/")
 
 	if flagId == "" {
-		http.Redirect(w, r, "it", 301)
+		http.Redirect(w, r, "/it", 301)
 		return
 	}
 
