@@ -19,7 +19,7 @@ func GetFlag(w http.ResponseWriter, r *http.Request) {
 	flagId := strings.TrimPrefix(r.URL.Path, "/")
 
 	if flagId == "" {
-		http.Redirect(w, r, "/it", 301)
+		fmt.Fprint(w, "Seleziona un paese aggiungendo il codice  ISO 3166-1 nell'URL (e.g. /it)")
 		return
 	}
 
