@@ -1,4 +1,4 @@
-# svg-flag-generator-with-name
+# svg-flag-generator-with-name 🏳️‍🌈
 
 Simple svg flag generator with name.
 
