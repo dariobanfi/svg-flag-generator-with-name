@@ -52,7 +52,7 @@ func GetFlag(w http.ResponseWriter, r *http.Request) {
 	}
 	sb.WriteString("</ul>")
 
-	w.Header().Add("Content-Type", "text/html")
+	w.Header().Add("Content-Type", "text/html; charset=utf-8")
 	fmt.Fprint(w, `
 <!DOCTYPE>
 <html>
