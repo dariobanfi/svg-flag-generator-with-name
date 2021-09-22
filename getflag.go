@@ -10,41 +10,46 @@ import (
 	"github.com/pariz/gountries"
 )
 
-var ASSET_URL = "https://raw.githubusercontent.com/lipis/flag-icon-css/master/flags/4x3/"
+var AssetUrl = "https://raw.githubusercontent.com/lipis/flag-icon-css/master/flags/4x3/"
 
-var COUNTRY_NAME_RECT = `<svg width="640" height="480" x="140" y="340"> <g transform="translate(50,50)"> <rect rx="3" ry="3" width="260" height="70" stroke="black" fill="white" stroke-width="3"/> <svg width="260px" height="70px"> <text font-family="'Helvetica'" font-size="1.3em" x="50%" y="50%" alignment-baseline="middle" text-anchor="middle">country_name</text></svg></g></svg>`
+var CountryNameRect = `<svg width="640" height="480" x="140" y="340"> <g transform="translate(50,50)"> <rect rx="3" ry="3" width="260" height="70" stroke="black" fill="white" stroke-width="3"/> <svg width="260px" height="70px"> <text font-family="'Helvetica'" font-size="1.3em" x="50%" y="50%" alignment-baseline="middle" text-anchor="middle">country_name</text></svg></g></svg>`
 
 func GetFlag(w http.ResponseWriter, r *http.Request) {
-	flagid := strings.TrimPrefix(r.URL.Path, "/")
+	flagId := strings.TrimPrefix(r.URL.Path, "/")
 
-	if flagid == "" {
-		fmt.Fprint(w, "Please insert a valid ISO 3166-1-alpha-2 code")
+	if flagId == "" {
+		http.Redirect(w, r, "it", 301)
 		return
 	}
 
 	// Gets country name from code
 	query := gountries.New()
-	country, _ := query.FindCountryByAlpha(flagid)
-	countryname := country.Name.Common
-	country_name_rect := strings.Replace(COUNTRY_NAME_RECT, "country_name", countryname, 1)
+	country, _ := query.FindCountryByAlpha(flagId)
+	countryName := getCountryNameForLocale(country, "ITA")
+	countryNameRect := strings.Replace(CountryNameRect, "country_name", countryName, 1)
 
-	resp, err := http.Get(ASSET_URL + flagid + ".svg")
+	// Downloads the flag svg
+	resp, err := http.Get(AssetUrl + flagId + ".svg")
 	if err != nil {
 		log.Fatalln(err)
-		fmt.Fprint(w, "Flag not found")
-		return
 	}
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalln(err)
-		fmt.Fprint(w, "Error downloading flag")
-		return
 	}
-
 	svg_code := string(body)
 	svg_end_index := strings.Index(svg_code, "</svg>")
-	svg_code = svg_code[:svg_end_index] + country_name_rect + svg_code[svg_end_index:]
+	svg_code = svg_code[:svg_end_index] + countryNameRect + svg_code[svg_end_index:]
+
+	// Builds list of all countries
+	countries := query.FindAllCountries()
+	var sb strings.Builder
+	sb.WriteString("<ul>")
+	for key, element := range countries {
+		sb.WriteString("<li><a href=\"" + strings.ToLower(key) + "\">" + getCountryNameForLocale(element, "ITA") + "</a></li>\n")
+
+	}
+	sb.WriteString("</ul>")
 
 	w.Header().Add("Content-Type", "text/html")
 	fmt.Fprint(w, `
@@ -56,7 +61,7 @@ func GetFlag(w http.ResponseWriter, r *http.Request) {
         const svg = document.getElementById('svgflag').innerHTML;
         const blob = new Blob([svg.toString()]);
         const element = document.createElement("a");
-        element.download = "`+flagid+`.svg";
+        element.download = "`+flagId+`.svg";
         element.href = window.URL.createObjectURL(blob);
         element.click();
         element.remove();
@@ -64,15 +69,26 @@ func GetFlag(w http.ResponseWriter, r *http.Request) {
     </script>
   </head>
   <body>
-  <h1>Here's the flag of `+countryname+`</h1>
+  <h1>Bandiera del Paese: `+countryName+`</h1>
   <div style="display:flex; flex-direction: row; justify-content: space-evenly;">
     <div style="width: 50%; text-align: center;">
-      <div id="svgflag">`+svg_code+`</div>
+      <div id="svgflag" style="border: 4px solid black;">`+svg_code+`</div>
       <br /><br /><br />
       <button onclick="downloadSVG()"> DOWNLOAD </button>
     </div>
   </div>
+  <div>
+      Altre bandiere:`+sb.String()+
+		`<div/>
   </body>
 </html>
   `)
+}
+
+func getCountryNameForLocale(country gountries.Country, locale string) string {
+	value := country.Translations[locale].Common
+	if len(value) == 0 {
+		return country.Name.Common
+	}
+	return value
 }
